@@ -2,5 +2,6 @@
 !.gitignore
 !gui.py
 !prototype.py
+!elan.py
 !*.md
 !requirements.txt
