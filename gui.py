@@ -23,7 +23,7 @@ with ui.button("choose file", on_click=choose_file) as b:
 
 
 with open(r".\web\styles.css", "r") as style:
-    css = "\n".join(style.readlines())
+    css = "".join(style.readlines())
     print(css)
 
 

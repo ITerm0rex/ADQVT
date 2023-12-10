@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>test</title>
+	<link rel="stylesheet" href="styles.css">
+	<style>
+
+	</style>
+	<script>
+		// setInterval(function () {
+		// 	document.body.style.backgroundColor = document.body.style.backgroundColor == "blue" ? "red" : "blue";
+		// }, 16);
+
+		requestAnimationFrame(function loop() {
+			// document.body.style.backgroundColor = document.body.style.backgroundColor == "blue" ? "red" : "blue";
+			//requestAnimationFrame(loop);
+		});
+	</script>
+</head>
+
+
+<body>
+	<input type="file" />
+	<img src="./mic/stationary.png" />
+	<img src="./mic/looking_at.png" />
+	<div class="button-row">
+		<button type="button">Button 1</button>
+		<button type="button">Button 2</button>
+		<button type="button">Button 3</button>
+	</div>
+	<pre id="out">
+
+	</pre>
+
+
+	<script type="module">
+		out.textContent = await(await fetch("./test-out.txt")).text()
+	</script>
+</body>
+
+</html>

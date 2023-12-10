@@ -3,5 +3,10 @@
 !gui.py
 !prototype.py
 !elan.py
+
+!/web/
+!/web/styles.css
+!/web/index.html
+
 !*.md
 !requirements.txt
