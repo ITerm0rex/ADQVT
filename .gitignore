@@ -1,0 +1,6 @@
+*
+!.gitignore
+!gui.py
+!prototype.py
+!*.md
+!requirements.txt
