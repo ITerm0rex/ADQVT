@@ -3,10 +3,14 @@
 !gui.py
 !prototype.py
 !elan.py
+!test_ui.py
 
 !/web/
 !/web/styles.css
 !/web/index.html
+
+!/.vscode/
+!/.vscode/tasks.json
 
 !*.md
 !requirements.txt

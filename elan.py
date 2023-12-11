@@ -8,4 +8,15 @@ data = Elan.Eaf(file)
 
 
 print(data.get_linked_files())
+print()
+
 print(data.get_controlled_vocabulary_names())
+print()
+
+print(data.get_external_ref_names())
+print()
+
+print(data.get_languages())
+print()
+
+print(data.get_linguistic_type_names())
