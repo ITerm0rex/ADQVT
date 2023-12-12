@@ -5,7 +5,7 @@
 			"label": "run",
 			"type": "process",
 			"command": [
-				"${command:python.interpreterPath}",
+				"${command:python.interpreterPath}"
 			],
 			"args": [
 				"-B",
@@ -29,7 +29,8 @@
 			},
 			"runOptions": {
 				"instanceLimit": 20
-			}
+			},
+			"problemMatcher": []
 		},
 		{
 			"label": "Terminate All Tasks",
@@ -38,7 +39,7 @@
 			"group": {
 				"kind": "build",
 				"isDefault": true
-			},
+			}
 		}
 	],
 	"inputs": [

@@ -27,6 +27,133 @@ def obj_hash(obj: object):
     return hash(json.dumps(obj))
 
 
+class moving_towards:
+    def __init__(self, filenames: list[str] = []):
+        self.filenames = filenames
+
+    def set(self, filenames: list[str] = []):
+        self.filenames = filenames
+
+    def create(self):
+        filename = self.filenames[0]
+
+        with open(filename) as file:
+            json_data = json.load(file)
+            annotations = json_data["annotations"]
+            gaze_list = [
+                [
+                    i["holds"],
+                    (i["end"] - i["start"]) / 1e3,
+                    i["arguments"],
+                    {"start": i["start"], "end": i["end"]},
+                ]
+                for x in annotations
+                for i in x["instances"]
+                if (x["class"] == "Motion" and i["holds"] == "moving_towards")
+            ]
+
+            gaze_hash = {obj_hash(tuple(x[2].values())): x[2] for x in gaze_list}
+
+            gaze_total = {
+                tuple(v.values()): sum(
+                    [g[1] for g in gaze_list if obj_hash(tuple(g[2].values())) == h]
+                )
+                for (h, v) in gaze_hash.items()
+            }
+
+            self.gaze_list = gaze_list
+            self.gaze_hash = gaze_hash
+            self.gaze_total = gaze_total
+            self.filename = filename
+
+    def show(self):
+        # fig = plt.figure()
+        fig = plt.gcf()
+        fig.set_size_inches(*(fig.get_size_inches() * 2))
+        # plt.autoscale()
+        plt.title(self.filename)
+        plt.xlabel("moving_towards(a, b)")
+        # plt.subplots_adjust(wspace=9, left=9, right=10)
+        # plt.margins(5)
+        plt.ylabel("Number of seconds total moving_towards(a, b)")
+        bars = (
+            list(f"({x[0]}, {x[1]})" for x in self.gaze_total.keys()),
+            list(self.gaze_total.values()),
+        )
+        # bc = plt.bar(*bars, width=2)
+        # plt.bar_label(bc, [f"{b:.2f}" for b in bars[1]])
+        # addlabels(*bars)
+        
+        plt.barh(*bars)
+        # plt.subplot_tool()
+        # plt.subplots_adjust(left=0.1, right=3.0, top=0.9, bottom=0.1)
+        # plt.show()
+
+
+
+class gaze:
+    def __init__(self, filenames: list[str] = []):
+        self.filenames = filenames
+
+    def set(self, filenames: list[str] = []):
+        self.filenames = filenames
+
+    def create(self):
+        filename = self.filenames[0]
+
+        with open(filename) as file:
+            json_data = json.load(file)
+            annotations = json_data["annotations"]
+            gaze_list = [
+                [
+                    i["holds"],
+                    (i["end"] - i["start"]) / 1e3,
+                    i["arguments"],
+                    {"start": i["start"], "end": i["end"]},
+                ]
+                for x in annotations
+                for i in x["instances"]
+                if (x["class"] == "Gaze" and i["holds"] == "looking_at")
+            ]
+
+            gaze_hash = {obj_hash(tuple(x[2].values())): x[2] for x in gaze_list}
+
+            gaze_total = {
+                tuple(v.values()): sum(
+                    [g[1] for g in gaze_list if obj_hash(tuple(g[2].values())) == h]
+                )
+                for (h, v) in gaze_hash.items()
+            }
+
+            self.gaze_list = gaze_list
+            self.gaze_hash = gaze_hash
+            self.gaze_total = gaze_total
+            self.filename = filename
+
+    def show(self):
+        # fig = plt.figure()
+        fig = plt.gcf()
+        fig.set_size_inches(*(fig.get_size_inches() * 2))
+        # plt.autoscale()
+        plt.title(self.filename)
+        plt.xlabel("looking_at(a, b)")
+        # plt.subplots_adjust(wspace=9, left=9, right=10)
+        # plt.margins(5)
+        plt.ylabel("Number of seconds total looking_at(a, b)")
+        bars = (
+            list(f"({x[0]}, {x[1]})" for x in self.gaze_total.keys()),
+            list(self.gaze_total.values()),
+        )
+        # bc = plt.bar(*bars, width=2)
+        # plt.bar_label(bc, [f"{b:.2f}" for b in bars[1]])
+        # addlabels(*bars)
+        
+        plt.barh(*bars)
+        # plt.subplot_tool()
+        # plt.subplots_adjust(left=0.1, right=3.0, top=0.9, bottom=0.1)
+        # plt.show()
+
+
 def main():
     with (
         open(anot_path) as fp,

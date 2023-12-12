@@ -1,3 +1,4 @@
+
 import asyncio
 import json
 import os
@@ -7,11 +8,16 @@ from matplotlib import pyplot as plt
 from nicegui import ui, app, run
 
 
+file_names = None
+
+
 async def choose_file():
     if app.native.main_window:
         if files := await app.native.main_window.create_file_dialog(
             allow_multiple=True
         ):
+            global file_names
+            file_names = files
             for file in files:
                 ui.notify(file)
 
@@ -175,12 +181,17 @@ def stuff():
         # async def aaa():
         #     await b.clicked()
         #     b.set_text("!!!!!!!!!!!!!!!!!!")
-        
+
         # if __name__ == "__main__":
         #     threading.Thread(target=lambda: asyncio.run(aaa())).run()
 
 
 stuff()
+
+
+
+with ui.dialog() as dialog, ui.card():
+    result = ui.markdown()
 
 ui.run(
     title="test",
@@ -192,3 +203,97 @@ ui.run(
     # prod_js=False,
     # tailwind=False,
 )
+
+
+# import asyncio
+# import json
+# import os
+# import threading
+# import numpy as np
+# from matplotlib import pyplot as plt
+# from nicegui import ui, app
+
+# class UIApp:
+#     def __init__(self):
+#         self.file_names = None
+#         # self.demo = Demo()
+
+#     async def choose_file(self):
+#         if app.native.main_window:
+#             if files := await app.native.main_window.create_file_dialog(allow_multiple=True):
+#                 self.file_names = files
+#                 for file in files:
+#                     ui.notify(file)
+
+#     def create_button(self, text, on_click_handler):
+#         with ui.button(text, on_click=on_click_handler) as button:
+#             button.style("background-color: green;")
+#         return button
+
+#     def create_tabs(self):
+#         with ui.tabs() as tabs:
+#             ui.tab("A")
+#             ui.tab("B")
+#             ui.tab("C").classes("bg-green-100")
+#         return tabs
+
+#     def create_footer(self):
+#         with ui.footer(value=False) as footer:
+#             ui.label("Footer")
+#         return footer
+
+#     # Add other UI creation methods as needed
+
+#     def run_app(self):
+#         ui.run(
+#             title="test",
+#             native=True,
+#             fullscreen=False,
+#             window_size=(1000, 800),
+#             reload=False,
+#             on_air=None
+#         )
+
+# if __name__ == "__main__":
+#     ui_app = UIApp()
+
+#     # Create UI components
+#     choose_file_button = ui_app.create_button("Choose File", ui_app.choose_file)
+#     tabs = ui_app.create_tabs()
+#     footer = ui_app.create_footer()
+
+#     # Arrange components
+#     with ui.header().classes(replace="row items-center") as header:
+#         ui.button(on_click=lambda: left_drawer.toggle(), icon="menu").props("flat color=white")
+
+#     with ui.left_drawer().classes("bg-blue-100") as left_drawer:
+#         ui.label("Side menu")
+
+#     with ui.page_sticky(position="bottom-right", x_offset=20, y_offset=20):
+#         ui.button(on_click=footer.toggle, icon="contact_support").props("fab")
+
+#     with ui.tab_panels(tabs, value="A").classes("w-full"):
+#         with ui.tab_panel("A"):
+#             ui.label("Content of A")
+#         with ui.tab_panel("B"):
+#             ui.label("Content of B")
+#         with ui.tab_panel("C"):
+#             ui.label("Content of C")
+
+#     tree = ui.tree(
+#         [
+#             {"id": "numbers", "icon": "tag", "children": [{"id": "1"}, {"id": "2"}]},
+#             {
+#                 "id": "letters",
+#                 "icon": "text_fields",
+#                 "children": [{"id": "A"}, {"id": "B"}],
+#             },
+#         ],
+#         label_key="id",
+#         on_select=lambda e: ui.notify(e.value),
+#     )
+
+#     # Add other UI components
+
+#     # Run the app
+#     ui_app.run_app()
