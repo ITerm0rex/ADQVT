@@ -8,24 +8,10 @@ from typing import Any, Awaitable, Callable, Coroutine, Union
 import numpy as np
 from matplotlib import pyplot as plt
 from nicegui import ui, app
+from nicegui import core
+
 
 import prototype
-
-
-def stop():
-    app.shutdown()
-    app.stop()
-    exit(0)
-
-
-# @dataclass
-# class DATA:
-#     filenames: list[str] = []
-#     hi: int = 0
-
-
-# DATA.filenames.append("aaaaa")
-# DATA.hi = 22
 
 
 from nicegui.functions.refreshable import _P, _T
@@ -45,65 +31,79 @@ def Idempotence(f: ui.refreshable[_P, _T]):
     return w
 
 
+def stop():
+    app.shutdown()
+    app.stop()
+    exit(0)
+
+
+@dataclass
+class env:
+    file_names: set[str]
+    Class: str = "Visibility"
+    Hold: str = "Visibility"
+
+
+# class Ide:#(ui.refreshable[_P, _T]):
+#     flag = True
+#     f: ui.refreshable[_P, _T]
+
+#     # Union[_T, Coroutine[None, None, _T]]:
+#     def __init__(self, f: ui.refreshable[_P, _T]):
+#         self.f = f
+
+#     def __call__(
+#         self, *args: _P.args, **kwargs: _P.kwargs
+#     ) -> _T | Awaitable[_T] | None:
+#         if self.flag:
+#             self.flag = False
+#             return self.f(*args, **kwargs)
+#         return self.f.refresh(*args, **kwargs)
+#         # return self.run(*args, **kwargs)
+
+#     # def run(self, *args: _P.args, **kwargs: _P.kwargs):
+#     #     if self.flag:
+#     #         self.flag = False
+#     #         return self.f(*args, **kwargs)
+#     #     return self.f.refresh(*args, **kwargs)
+
+
 @Idempotence
 @ui.refreshable
-def show_plot(filenames: list[str]):
+def show_plot():
     # await asyncio.sleep(2)
     with ui.row() as row:
-        # row.classes("absolute-right")
+        row.classes("absolute-right")
         # row.classes("row reverse")
-        row.classes("full-width row inline no-wrap justify-end items-end content-end")
+        # row.classes("full-width row inline no-wrap justify-end items-end content-end")
 
-        with ui.pyplot(dpi=0.5) as g:
+        print(env.file_names)
+
+        if env.file_names == set():
+            return
+
+        with ui.pyplot() as g:
             # g.style("overflow: auto;")
-            g.style("zoom: 70%;")
+            g.style("zoom: 85%;")
             # g.style("max-width: 200px; max-height: 100px;")
 
-            plot = prototype.moving_towards()
+            plot = prototype.query()
 
-            plot.set(filenames)
+            # plot.set(filenames, "Visibility", "Visibility")
+            plot.set(list(env.file_names), env.Class, env.Hold)
+            # plot.set([r".\HCI-2023\Annotated_Data_JSON\V3\event_json_data\s2_v3_-_matchmaker_scene\Annotation_s2_v3_-_matchmaker_scene.json"], env.Class, env.Hold)
             plot.create()
             plot.show()
 
             g.on("click", stop)
 
 
-# pathf = r".\HCI-2023\Annotated_Data_JSON\V3\event_json_data\s2_v3_-_matchmaker_scene\Annotation_s2_v3_-_matchmaker_scene.json"
-pathf = r".\HCI-2023\Annotated_Data_JSON\V3\event_json_data\s4_v3_-_macbeth_opening_scene\Annotation_s4_v3_-_macbeth_opening_scene.json"
-
-
-if isinstance(v := show_plot([pathf]), Coroutine):
-    print(asyncio.run(v))
-else:
-    print(v)
-
-
-# @(lambda f: lambda x: f(2 * x))
-# def fun(x):
-#     print(x)
-
-
-# fun(2)
-
-# mmm = lambda x: 2 * x
-
-
-# def mmm(x):
-#     return x * 2
-
-
-# print(mmm(1))
-
-
 class UIApp:
     def __init__(self):
-        self.file_names = [
-            r".\HCI-2023\Annotated_Data_JSON\V3\event_json_data\s2_v3_-_matchmaker_scene\Annotation_s2_v3_-_matchmaker_scene.json"
-        ]
+        # self.file_names = set()
         self.select = None
         self.row = None
         self.plt = None
-
         self.flag = True
 
     async def choose_file(self):
@@ -111,12 +111,16 @@ class UIApp:
             if files := await app.native.main_window.create_file_dialog(
                 allow_multiple=True
             ):
-                self.file_names.clear()
-                self.file_names += list(files)
+                env.file_names.clear()
+                env.file_names.update(files)
+                # self.file_names.update(files)
+
+                # self.file_names.clear()
+                # self.file_names += list(files)
 
                 # print(show_plot.instance)
 
-                show_plot(self.file_names)
+                # show_plot()
 
                 # if self.flag:
                 #     self.flag = False
@@ -133,49 +137,15 @@ class UIApp:
         # if self.select:
         #     self.select.set_options(self.file_names, value=self.file_names[0])
 
-    # def update_selected_files(self):
-    #     if self.select:
-    #         self.select.clear()
-
-    #     self.select = ui.select(self.file_names, value=1)
-    #     self.select.classes("w-200")
-
-    #     if self.row:
-    #         self.row.clear()
-
-    #     with ui.row() as row:
-    #         self.row = row
-    #         # row.classes("absolute-right")
-
-    #         # row.tailwind.background_color("green-400")
-    #         # row.tailwind.position("absolute")
-    #         # row.tailwind.top_right_bottom_left()
-
-    #         # with ui.pyplot(figsize=(6, 4)) as g:
-    #         if self.plt:
-    #             self.plt.clear()
-
-    #         with ui.pyplot() as g:
-    #             self.plt = g
-    #             self.gz = prototype.gaze()
-
-    #             self.gz.set(self.file_names)
-    #             self.gz.create()
-    #             self.gz.show()
-
-    #             g.on("click", stop)
-
     def create_button(self, text, on_click_handler):
         with ui.button(text, on_click=on_click_handler) as button:
             button.style("background-color: green;")
         return button
 
     def create_selection(self, bind: str):
-        with ui.select({1: "hii"}, value=1) as select:
-            select.bind_value(
-                self, bind, #forward=lambda x: x, backward=lambda x: enumerate(x)
-            )
-            select.classes("w-200")
+        with ui.select([]) as select:
+            select.bind_value(env, bind)
+            # select.classes("w-200")
             return select
 
     def run_app(self):
@@ -193,35 +163,72 @@ class UIApp:
 
         # self.update_selected_files()
 
-        ui.button("[exit]", on_click=stop).classes("absolute-bottom-right")
+        # .tailwind.background_color("red-100")
 
         # app.native.start_args["debug"] = True
         # if app.native.main_window:
         #     app.native.main_window.maximized = True
 
-        app.native.start_args["maximized"] = True
+        # core.app.native.start_args["maximized"] = True
+
+        # opti = {
+        #     "maximized": True
+        # }
+
+        # app.native.window_args["maximized"] = True
+
+        # pathf = r".\HCI-2023\Annotated_Data_JSON\V3\event_json_data\s2_v3_-_matchmaker_scene\Annotation_s2_v3_-_matchmaker_scene.json"
+        # # pathf = r".\HCI-2023\Annotated_Data_JSON\V3\event_json_data\s4_v3_-_macbeth_opening_scene\Annotation_s4_v3_-_macbeth_opening_scene.json"
+
+        # if isinstance(v := show_plot([pathf]), Coroutine):
+        #     print(asyncio.run(v))
+        # else:
+        #     print(v)
+
         ui.run(
             title="test",
             native=True,
             fullscreen=False,
-            window_size=(1000, 800),
+            window_size=(1300, 900),
             reload=False,
             on_air=None,
+            # frameless=True
+            # *opti
         )
 
 
 if __name__ == "__main__":
     ui_app = UIApp()
+    env.file_names = set()
 
-    # Create UI components
     # choose_file_button = ui_app.create_button("Choose File", ui_app.choose_file)
 
-    with ui.button("Choose File", on_click=ui_app.choose_file) as button:
-        button.tailwind.background_color("green-100")
+    with ui.button("Choose File") as button:
+        # button.tailwind.background_color("green-100")
         # button.style("background-color: green;")
+        button.on("click", ui_app.choose_file)
 
-    ui_app.create_selection("file_names")
-    # ui_app.create_selection("option")
+    # with ui_app.create_selection("file_names") as fi:
+    #     fi.on("click", lambda: fi.set_options(list(env.file_names)))
+
+    with ui.select([]) as fi:
+        # fi.bind_value(env, "file_names", forward=list)
+        fi.on("input", lambda: fi.set_options(list(env.file_names)))
+
+    ui_app.create_selection("Class").set_options(
+        ["Visibility", "Gaze", "HumanAction", "Saccade", "Attention"]
+    )
+    ui_app.create_selection("Hold").set_options(
+        ["Visibility", "looking_at", "speaking", "markup", "face", "torso"]
+    )
+
+    show_plot()
+
+    ui.button("[exit]", on_click=stop).classes("absolute-top-right bg-red")
+
+    with ui.button("Render") as button:
+        # button.on("click", lambda:print(env.file_names))
+        button.on("click", show_plot)
 
     # select = ui.select(file_names, value=1)
     # select.classes("w-200")
@@ -252,6 +259,10 @@ if __name__ == "__main__":
     #     with ui.tab_panel("C"):
     #         ui.label("Content of C")
 
+    # [
+    #     r".\HCI-2023\Annotated_Data_JSON\V3\event_json_data\s2_v3_-_matchmaker_scene\Annotation_s2_v3_-_matchmaker_scene.json"
+    # ]
+
     # tree = ui.tree(
     #     [
     #         {"id": "numbers", "icon": "tag", "children": [{"id": "1"}, {"id": "2"}]},
@@ -265,7 +276,5 @@ if __name__ == "__main__":
     #     on_select=lambda e: ui.notify(e.value),
     # )
 
-    # Add other UI components
 
-    # Run the app
     ui_app.run_app()

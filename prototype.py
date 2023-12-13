@@ -9,15 +9,6 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 
-anot_path = r"\HCI-2023\Annotated_Data_JSON\V3\event_json_data\s2_v3_-_matchmaker_scene\Annotation_s2_v3_-_matchmaker_scene.json"
-anot_path = "." + anot_path.replace(sep, "/")
-anot_name = os.path.basename(anot_path)
-
-c_path = r"\HCI-2023\Annotated_Data_JSON\V3\event_json_data\s2_v3_-_matchmaker_scene\stimulus_info.jscsrc"
-c_path = "." + c_path.replace(sep, "/")
-c_name = os.path.basename(c_path)
-
-
 def addlabels(x, y):
     for i in range(len(x)):
         plt.text(i, y[i], f"{y[i]:.2f}", ha="center")
@@ -27,12 +18,12 @@ def obj_hash(obj: object):
     return hash(json.dumps(obj))
 
 
-class moving_towards:
-    def __init__(self, filenames: list[str] = []):
+class query:
+    def set(self, filenames: list[str] = [], set_class="Gaze", set_holds="looking_at"):
         self.filenames = filenames
-
-    def set(self, filenames: list[str] = []):
-        self.filenames = filenames
+        self.set_class = set_class
+        self.set_holds = set_holds
+        return self
 
     def create(self):
         filename = self.filenames[0]
@@ -40,7 +31,7 @@ class moving_towards:
         with open(filename) as file:
             json_data = json.load(file)
             annotations = json_data["annotations"]
-            gaze_list = [
+            query_list = [
                 [
                     i["holds"],
                     (i["end"] - i["start"]) / 1e3,
@@ -49,22 +40,23 @@ class moving_towards:
                 ]
                 for x in annotations
                 for i in x["instances"]
-                if (x["class"] == "Motion" and i["holds"] == "moving_towards")
+                if (x["class"] == self.set_class and i["holds"] == self.set_holds)
             ]
 
-            gaze_hash = {obj_hash(tuple(x[2].values())): x[2] for x in gaze_list}
+            query_hash = {obj_hash(tuple(x[2].values())): x[2] for x in query_list}
 
-            gaze_total = {
+            query_total = {
                 tuple(v.values()): sum(
-                    [g[1] for g in gaze_list if obj_hash(tuple(g[2].values())) == h]
+                    [g[1] for g in query_list if obj_hash(tuple(g[2].values())) == h]
                 )
-                for (h, v) in gaze_hash.items()
+                for (h, v) in query_hash.items()
             }
 
-            self.gaze_list = gaze_list
-            self.gaze_hash = gaze_hash
-            self.gaze_total = gaze_total
+            self.query_list = query_list
+            self.query_hash = query_hash
+            self.query_total = query_total
             self.filename = filename
+            return self
 
     def show(self):
         # fig = plt.figure()
@@ -72,89 +64,34 @@ class moving_towards:
         fig.set_size_inches(*(fig.get_size_inches() * 2))
         # plt.autoscale()
         plt.title(self.filename)
-        plt.xlabel("moving_towards(a, b)")
+        plt.xlabel(f"{self.set_holds}(...)")
         # plt.subplots_adjust(wspace=9, left=9, right=10)
         # plt.margins(5)
-        plt.ylabel("Number of seconds total moving_towards(a, b)")
+        plt.ylabel(f"Number of seconds total {self.set_holds}(...)")
         bars = (
-            list(f"({x[0]}, {x[1]})" for x in self.gaze_total.keys()),
-            list(self.gaze_total.values()),
+            list(f"({', '.join(x)})" for x in self.query_total.keys()),
+            list(self.query_total.values()),
         )
         # bc = plt.bar(*bars, width=2)
         # plt.bar_label(bc, [f"{b:.2f}" for b in bars[1]])
         # addlabels(*bars)
-        
+
         plt.barh(*bars)
         # plt.subplot_tool()
         # plt.subplots_adjust(left=0.1, right=3.0, top=0.9, bottom=0.1)
         # plt.show()
-
-
-
-class gaze:
-    def __init__(self, filenames: list[str] = []):
-        self.filenames = filenames
-
-    def set(self, filenames: list[str] = []):
-        self.filenames = filenames
-
-    def create(self):
-        filename = self.filenames[0]
-
-        with open(filename) as file:
-            json_data = json.load(file)
-            annotations = json_data["annotations"]
-            gaze_list = [
-                [
-                    i["holds"],
-                    (i["end"] - i["start"]) / 1e3,
-                    i["arguments"],
-                    {"start": i["start"], "end": i["end"]},
-                ]
-                for x in annotations
-                for i in x["instances"]
-                if (x["class"] == "Gaze" and i["holds"] == "looking_at")
-            ]
-
-            gaze_hash = {obj_hash(tuple(x[2].values())): x[2] for x in gaze_list}
-
-            gaze_total = {
-                tuple(v.values()): sum(
-                    [g[1] for g in gaze_list if obj_hash(tuple(g[2].values())) == h]
-                )
-                for (h, v) in gaze_hash.items()
-            }
-
-            self.gaze_list = gaze_list
-            self.gaze_hash = gaze_hash
-            self.gaze_total = gaze_total
-            self.filename = filename
-
-    def show(self):
-        # fig = plt.figure()
-        fig = plt.gcf()
-        fig.set_size_inches(*(fig.get_size_inches() * 2))
-        # plt.autoscale()
-        plt.title(self.filename)
-        plt.xlabel("looking_at(a, b)")
-        # plt.subplots_adjust(wspace=9, left=9, right=10)
-        # plt.margins(5)
-        plt.ylabel("Number of seconds total looking_at(a, b)")
-        bars = (
-            list(f"({x[0]}, {x[1]})" for x in self.gaze_total.keys()),
-            list(self.gaze_total.values()),
-        )
-        # bc = plt.bar(*bars, width=2)
-        # plt.bar_label(bc, [f"{b:.2f}" for b in bars[1]])
-        # addlabels(*bars)
-        
-        plt.barh(*bars)
-        # plt.subplot_tool()
-        # plt.subplots_adjust(left=0.1, right=3.0, top=0.9, bottom=0.1)
-        # plt.show()
+        return self
 
 
 def main():
+    anot_path = r"\HCI-2023\Annotated_Data_JSON\V3\event_json_data\s2_v3_-_matchmaker_scene\Annotation_s2_v3_-_matchmaker_scene.json"
+    anot_path = "." + anot_path.replace(sep, "/")
+    anot_name = os.path.basename(anot_path)
+
+    c_path = r"\HCI-2023\Annotated_Data_JSON\V3\event_json_data\s2_v3_-_matchmaker_scene\stimulus_info.jscsrc"
+    c_path = "." + c_path.replace(sep, "/")
+    c_name = os.path.basename(c_path)
+
     with (
         open(anot_path) as fp,
         open(c_path) as fc,
