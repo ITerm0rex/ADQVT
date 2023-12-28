@@ -1,6 +1,7 @@
 # %%
 import asyncio
 from dataclasses import dataclass, field
+import glob
 import json
 import os
 import sys
@@ -10,6 +11,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from nicegui import ui, app
 from nicegui import core
+from nicegui.logging import log
 
 
 import prototype
@@ -35,16 +37,7 @@ def Idempotence(f: ui.refreshable[_P, _T]):  # type: ignore
 def stop():
     app.stop()
     app.shutdown()
-    # if app.native.main_window:
-    #     app.native.main_window.destroy()
-    # exit(0)
-
-
-# from nicegui.logging import log
-
-# log.warning("aaaaaaaa")
-
-# app.native.window_args
+    exit(0)
 
 
 @dataclass
@@ -53,7 +46,9 @@ class env_fact:
     Class: str = "Visibility"
     Hold: str = "Visibility"
 
+
 env = env_fact()
+
 
 @Idempotence
 @ui.refreshable
@@ -73,11 +68,9 @@ def show_plot():
             g.style("zoom: 85%;")
             # g.style("max-width: 200px; max-height: 100px;")
 
-            plot = prototype.query()
+            plot = prototype.query_time_total()
 
-            # plot.set(filenames, "Visibility", "Visibility")
             plot.set(list(env.file_names), env.Class, env.Hold)
-            # plot.set([r".\HCI-2023\Annotated_Data_JSON\V3\event_json_data\s2_v3_-_matchmaker_scene\Annotation_s2_v3_-_matchmaker_scene.json"], env.Class, env.Hold)
             plot.create()
             plot.show()
 
@@ -91,6 +84,16 @@ class UIApp:
     #     self.row = None
     #     self.plt = None
     #     self.flag = True
+    
+    @Idempotence
+    @ui.refreshable
+    def test(self,opt):
+        with ui.row() as r:
+            ui.label("hiii")
+            with ui.select([]) as fi:
+                fi.set_options(opt)
+                # fi.bind_value(env, "file_names", forward=list)
+                fi.on("input", lambda: fi.set_options(list(env.file_names)))
 
     async def choose_file(self):
         if app.native.main_window:
@@ -119,26 +122,41 @@ class UIApp:
             # button.style("background-color: green;")
             button.on("click", self.choose_file)
 
-        # with ui.button("maxxx") as button:
-        #     # button.tailwind.background_color("green-100")
-        #     # button.style("background-color: green;")
+        with ui.button("maxxx") as button:
+            # button.tailwind.background_color("green-100")
+            # button.style("background-color: green;")
 
-        #     def maxx():
-        #         # print((app.native.main_window), sep="\n")
-        #         if app.native.main_window:
-        #             app.native.main_window.signal_server_shutdown()
-        #             # app.native.main_window.maximized = True
 
-        #     button.on("click", maxx)
+            def maxx():
+                # print((app.native.main_window), sep="\n")
+                if app.native.main_window:
+                    # app.native.main_window.maximize()
+                    app.native.main_window.toggle_fullscreen()
+                    # app.native.main_window.maximized = True
+                    getattr(app.native.main_window, "toggle_fullscreen")
+
+            button.on("click", maxx)
 
         with ui.select([]) as fi:
             # fi.bind_value(env, "file_names", forward=list)
             fi.on("input", lambda: fi.set_options(list(env.file_names)))
 
-        with ui.row() as row:
-            row.classes("absolute-right orange-6")
-            with ui.select([1, 2, 3]) as fi:
-                fi.classes("absolute-center")
+        # with ui.row() as row:
+        #     # row.classes("absolute-right orange-6")
+        #     # with ui.select([1, 2, 3]) as fi:
+        #     #     fi.classes("absolute-center")
+        #     with ui.select([1, 2, 3]) as fi:
+        #         # fi.classes("absolute-center")
+        #         pass
+        #     with ui.select([1, 2, 3]) as fi:
+        #         # fi.classes("absolute-center")
+        #         pass
+        #     with ui.select([1, 2, 3]) as fi:
+        #         # fi.classes("absolute-center")
+        #         pass
+        
+        # ui.add_body_html("""
+        #                  """)
 
         self.create_selection("Class").set_options(
             ["Visibility", "Gaze", "HumanAction", "Saccade", "Attention"]
@@ -149,10 +167,16 @@ class UIApp:
         )
 
         show_plot()
+        
+        self.test([1,2,3])
+        
+        self.test([4,5,6])
+
 
         # ui.button("[exit]", on_click=stop).classes("absolute-top-right bg-red")
-        # with ui.button("[exit]", on_click=stop) as but:
-        #     but.classes("absolute-top-right bg-red")
+        
+        with ui.button("[exit]", on_click=stop) as but:
+            but.classes("absolute-top-right bg-red")
 
         with ui.button("Render") as button:
             # button.on("click", lambda:print(env.file_names))
@@ -173,15 +197,19 @@ class UIApp:
             pass
 
 
-if __name__ in {"__main__", "__mp_main__"}:
+if __name__ in {"__main__"}:
+# if __name__ in {"__main__", "__mp_main__"}:
     ui_app = UIApp()
-
-    # class aaa:
-    #     qqq = 3
-    #     abc = lambda self, x: self.qqq * x
-
-    #     def bbb(self):
-    #         print(self.abc(3))
-
-    # aaa().bbb()
+    
+    # events = glob.glob(
+    #     r"./HCI-2023/Annotated_Data_JSON/V3/event_json_data/**/Annotation_*.json",
+    #     recursive=True,
+    # )
+    events = glob.glob(
+        r"./HCI-2023/Annotated_Data_JSON/V3/event_json_data/*",
+        recursive=True,
+    )
+    
+    print(events)
+    
     ui_app.run_app()

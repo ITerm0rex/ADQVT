@@ -18,7 +18,80 @@ def obj_hash(obj: object):
     return hash(json.dumps(obj))
 
 
-class query:
+class query_time_total:
+    def set(self, filenames: list[str] = [], set_class="Gaze", set_holds="looking_at"):
+        self.filenames = filenames
+        self.set_class = set_class
+        self.set_holds = set_holds
+        return self
+
+    def create(self):
+        filename = self.filenames[0]
+
+        with open(filename) as file:
+            json_data = json.load(file)
+            annotations = json_data["annotations"]
+            query_list = [
+                [
+                    i["holds"],
+                    (i["end"] - i["start"]) / 1e3,
+                    i["arguments"],
+                    {"start": i["start"], "end": i["end"]},
+                ]
+                for x in annotations
+                for i in x["instances"]
+                if (x["class"] == self.set_class and i["holds"] == self.set_holds)
+            ]
+
+            query_hash = {obj_hash(tuple(x[2].values())): x[2] for x in query_list}
+
+            query_total = {
+                tuple(v.values()): sum(
+                    [g[1] for g in query_list if obj_hash(tuple(g[2].values())) == h]
+                )
+                for (h, v) in query_hash.items()
+            }
+
+            self.query_list = query_list
+            self.query_hash = query_hash
+            self.query_total = query_total
+            self.filename = filename
+            return self
+
+    def show(self):
+        # fig = plt.figure()
+        fig = plt.gcf()
+        fig.set_size_inches(*(fig.get_size_inches() * 2))
+        # plt.autoscale()
+        plt.title(self.filename)
+        plt.xlabel(f"{self.set_holds}(...)")
+        # plt.subplots_adjust(wspace=9, left=9, right=10)
+        # plt.margins(5)
+        plt.ylabel(f"Number of seconds total {self.set_holds}(...)")
+        bars = (
+            list(f"({', '.join(x)})" for x in self.query_total.keys()),
+            list(self.query_total.values()),
+        )
+        # bc = plt.bar(*bars, width=2)
+        # plt.bar_label(bc, [f"{b:.2f}" for b in bars[1]])
+        # addlabels(*bars)
+
+        plt.barh(*bars)
+        # plt.subplot_tool()
+        # plt.subplots_adjust(left=0.1, right=3.0, top=0.9, bottom=0.1)
+        # plt.show()
+        return self
+
+
+
+# p1->r:f
+# a->r:f
+
+# |.....|         |..............|
+#     |..|                |.........|
+
+
+class query_count_total:
     def set(self, filenames: list[str] = [], set_class="Gaze", set_holds="looking_at"):
         self.filenames = filenames
         self.set_class = set_class
