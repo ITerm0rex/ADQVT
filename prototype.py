@@ -90,6 +90,58 @@ class query_time_total:
 # |.....|         |..............|
 #     |..|                |.........|
 
+class query_test:
+    def set(self, filenames: list[str] = [], set_class="Gaze", set_holds="looking_at"):
+        self.filenames = filenames
+        self.set_class = set_class
+        self.set_holds = set_holds
+        return self
+    
+    def create(self):
+        filename = self.filenames[0]
+        
+        with open(filename) as file:
+            json_data = json.load(file)
+            annotations = json_data["annotations"]
+            query_list = []
+            # query_list = [
+            #     [
+            #         i["holds"],
+            #         (i["end"] - i["start"]) / 1e3,
+            #         i["arguments"],
+            #         {"start": i["start"], "end": i["end"]},
+            #     ]
+            #     for x in annotations
+            #     for i in x["instances"]
+            #     if (x["class"] == self.set_class and i["holds"] == self.set_holds)
+            # ]
+            
+            for x in annotations:
+                for i in x["instances"]:
+                    if (x["class"] == self.set_class and i["holds"] == self.set_holds):
+                        query_list.append([
+                            i["holds"],
+                            (i["end"] - i["start"]) / 1e3,
+                            i["arguments"],
+                            {"start": i["start"], "end": i["end"]},
+                        ])
+            
+            print(query_list)
+
+        self.query_list = [1,2,3]
+    
+        self.filename = filename
+        return self
+
+    def show(self):
+        fig = plt.gcf()
+        fig.set_size_inches(*(fig.get_size_inches() * 2))
+        plt.title(self.filename)
+        plt.barh(self.query_list, self.query_list)
+        plt.xlabel(f"{self.set_holds}(...)")
+        plt.ylabel(f"Number of seconds total {self.set_holds}(...)")
+        return self
+
 
 class query_count_total:
     def set(self, filenames: list[str] = [], set_class="Gaze", set_holds="looking_at"):

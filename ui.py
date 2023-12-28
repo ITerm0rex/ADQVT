@@ -68,7 +68,7 @@ def show_plot():
             g.style("zoom: 85%;")
             # g.style("max-width: 200px; max-height: 100px;")
 
-            plot = prototype.query_time_total()
+            plot = prototype.query_test()
 
             plot.set(list(env.file_names), env.Class, env.Hold)
             plot.create()
