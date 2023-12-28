@@ -84,14 +84,17 @@ class UIApp:
     #     self.row = None
     #     self.plt = None
     #     self.flag = True
-    
+
     @Idempotence
     @ui.refreshable
-    def test(self,opt):
+    def test(self, opt, opt2=True):
         with ui.row() as r:
             ui.label("hiii")
-            with ui.select([]) as fi:
-                fi.set_options(opt)
+            if opt2:
+                ui.label("ööööööööö")
+
+            with ui.select(opt) as fi:
+                # fi.set_options(opt)
                 # fi.bind_value(env, "file_names", forward=list)
                 fi.on("input", lambda: fi.set_options(list(env.file_names)))
 
@@ -126,7 +129,6 @@ class UIApp:
             # button.tailwind.background_color("green-100")
             # button.style("background-color: green;")
 
-
             def maxx():
                 # print((app.native.main_window), sep="\n")
                 if app.native.main_window:
@@ -154,7 +156,7 @@ class UIApp:
         #     with ui.select([1, 2, 3]) as fi:
         #         # fi.classes("absolute-center")
         #         pass
-        
+
         # ui.add_body_html("""
         #                  """)
 
@@ -167,14 +169,21 @@ class UIApp:
         )
 
         show_plot()
-        
-        self.test([1,2,3])
-        
-        self.test([4,5,6])
 
+        flag = True
+
+        def swi():
+            nonlocal flag
+            if flag:
+                self.test([1, 2, 3])
+            else:
+                self.test([4, 5, 6], False)
+            flag = not flag
+
+        ui.button("aaaaa", on_click=swi)
 
         # ui.button("[exit]", on_click=stop).classes("absolute-top-right bg-red")
-        
+
         with ui.button("[exit]", on_click=stop) as but:
             but.classes("absolute-top-right bg-red")
 
@@ -198,9 +207,9 @@ class UIApp:
 
 
 if __name__ in {"__main__"}:
-# if __name__ in {"__main__", "__mp_main__"}:
+    # if __name__ in {"__main__", "__mp_main__"}:
     ui_app = UIApp()
-    
+
     # events = glob.glob(
     #     r"./HCI-2023/Annotated_Data_JSON/V3/event_json_data/**/Annotation_*.json",
     #     recursive=True,
@@ -209,7 +218,7 @@ if __name__ in {"__main__"}:
         r"./HCI-2023/Annotated_Data_JSON/V3/event_json_data/*",
         recursive=True,
     )
-    
+
     print(events)
-    
+
     ui_app.run_app()
