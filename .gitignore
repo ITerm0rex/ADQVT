@@ -5,6 +5,8 @@
 !elan.py
 !test_ui.py
 !ui.py
+!utility.py
+!prototype*.py
 
 !/web/
 !/web/styles.css

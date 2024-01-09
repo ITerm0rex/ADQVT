@@ -7,6 +7,20 @@ import random
 
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import plotly.express as px
+from nicegui import ui, app
+
+
+class BaseModel:
+    def load(self):
+        pass
+
+    def create(self):
+        pass
+
+    def show(self):
+        pass
 
 
 def addlabels(x, y):
@@ -18,7 +32,7 @@ def obj_hash(obj: object):
     return hash(json.dumps(obj))
 
 
-class query_time_total:
+class query_time_total(BaseModel):
     def set(self, filenames: list[str] = [], set_class="Gaze", set_holds="looking_at"):
         self.filenames = filenames
         self.set_class = set_class
@@ -81,7 +95,51 @@ class query_time_total:
         # plt.subplots_adjust(left=0.1, right=3.0, top=0.9, bottom=0.1)
         # plt.show()
         return self
+    
+    def show_options(self):
+        with ui.row() as row:
+            with ui.select([]) as select:
+                select.bind_value(env, "Class")
+                select.set_options(
+                    ["Visibility", "Gaze", "HumanAction", "Saccade", "Attention"]
+                )
+                select.set_value("Visibility")
 
+            with ui.select([]) as select:
+                select.bind_value(env, "Hold")
+                select.set_options(
+                    ["Visibility", "looking_at", "speaking", "markup", "face", "torso"]
+                )
+                select.set_value("Visibility")
+
+    def show2(self):
+        # fig = plt.gcf()
+        # fig.set_size_inches(*(fig.get_size_inches() * 2))
+        # fig = px.bar(x=self.query_list, y=self.query_list)
+        # fig.show()
+        # plt.title(self.filename)
+        # plt.barh(self.query_list, self.query_list)
+        # plt.xlabel(f"{self.set_holds}(...)")
+        # plt.ylabel(f"Number of seconds total {self.set_holds}(...)")
+        
+        # fig = go.Figure(go.Scatter(x=[1, 2, 3, 4], y=[1, 2, 3, 2.5]))
+        # fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
+        # ui.plotly(fig).classes('w-full h-40')
+        
+        
+        
+        
+        bars = (
+            list(f"({', '.join(x)})" for x in self.query_total.keys()),
+            list(self.query_total.values()),
+        )
+
+        fig = go.Figure(go.Bar(x=bars[0], y=bars[1]))
+        fig.update_layout(margin=dict(l=10, r=10, t=10, b=10))
+        # plo = ui.plotly(fig).classes("w-full h-400")
+        plo = ui.plotly(fig).classes("w-full h-full")
+        plo.on("plotly_click", ui.notify)
+        return self
 
 
 # p1->r:f
@@ -90,16 +148,17 @@ class query_time_total:
 # |.....|         |..............|
 #     |..|                |.........|
 
-class query_test:
+
+class query_test(BaseModel):
     def set(self, filenames: list[str] = [], set_class="Gaze", set_holds="looking_at"):
         self.filenames = filenames
         self.set_class = set_class
         self.set_holds = set_holds
         return self
-    
+
     def create(self):
         filename = self.filenames[0]
-        
+
         with open(filename) as file:
             json_data = json.load(file)
             annotations = json_data["annotations"]
@@ -115,21 +174,23 @@ class query_test:
             #     for i in x["instances"]
             #     if (x["class"] == self.set_class and i["holds"] == self.set_holds)
             # ]
-            
+
             for x in annotations:
                 for i in x["instances"]:
-                    if (x["class"] == self.set_class and i["holds"] == self.set_holds):
-                        query_list.append([
-                            i["holds"],
-                            (i["end"] - i["start"]) / 1e3,
-                            i["arguments"],
-                            {"start": i["start"], "end": i["end"]},
-                        ])
-            
+                    if x["class"] == self.set_class and i["holds"] == self.set_holds:
+                        query_list.append(
+                            [
+                                i["holds"],
+                                (i["end"] - i["start"]) / 1e3,
+                                i["arguments"],
+                                {"start": i["start"], "end": i["end"]},
+                            ]
+                        )
+
             print(query_list)
 
-        self.query_list = [1,2,3]
-    
+        self.query_list = [1, 2, 3]
+
         self.filename = filename
         return self
 
@@ -143,7 +204,7 @@ class query_test:
         return self
 
 
-class query_count_total:
+class query_count_total(BaseModel):
     def set(self, filenames: list[str] = [], set_class="Gaze", set_holds="looking_at"):
         self.filenames = filenames
         self.set_class = set_class
